@@ -15,9 +15,15 @@ app.use(morgan(morganOption))
 app.use(helmet())
 app.use(cors())
 app.use(helmet())
+app.use(express.json())
 
 app.get('/', (req, res) => {
-    res.send('Hello, world!')
+    res.send('A GET Request')
+})
+
+app.post('/', (req, res) => {
+    console.log(req.body)
+    res.send('POST request received')
 })
 
 app.use(function errorHandler(error, req, res, next) {
