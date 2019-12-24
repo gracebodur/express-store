@@ -18,6 +18,17 @@ app.use(cors())
 app.use(helmet())
 app.use(express.json())
 
+app.use(function errorHandler(error, req, res, next) {
+    let response
+    if (NODE_ENV === 'production') {
+        response = { error: {message: 'server error'}}
+    } else {
+        console.error(error)
+        response = { message: error.message, error }
+    }
+    res.status(500).json(response)
+})
+
 const users = [
     {
         "id": "3c8da4d5-1597-46e7-baa1-e402aed70d80",
@@ -25,14 +36,14 @@ const users = [
         "password": "c00d1ng1sc00l",
         "favoriteClub": "Cache Valley Stone Society",
         "newsLetter": "true"
-      },
-      {
+    },
+    {
         "id": "ce20079c-2326-4f17-8ac4-f617bfd28b7f",
         "username": "johnBlocton",
         "password": "veryg00dpassw0rd",
         "favoriteClub": "Salt City Curling Club",
         "newsLetter": "false"
-      }
+    }
 ]
 
 // app.get('/', (req, res) => {
@@ -43,6 +54,29 @@ const users = [
 //     console.log(req.body)
 //     res.send('POST request received')
 // })
+app.get('/user', (req, res) => {
+    res
+      .json(users);
+  });
+
+app.delete('/user/:userId', (req, res) => {
+    const { userId } = req.params
+    
+    // console.log(userId);
+    const index = users.findIndex(u => u.id === userId)
+    // make sure we actually find a user with that id
+    if (index === -1) {
+    return res
+      .status(404)
+      .send('User not found');
+  }
+  users.splice(index, 1);
+    // res.send('Got it.');
+    // res.send('Deleted');
+    res
+        .status(204)
+        .end()
+  });
 
 app.post('/user', (req, res) => {
     //get the data
@@ -118,15 +152,5 @@ app.post('/user', (req, res) => {
     res.send('All Validation passed')
 })
 
-app.use(function errorHandler(error, req, res, next) {
-    let response
-    if (NODE_ENV === 'production') {
-        response = { error: {message: 'server error'}}
-    } else {
-        console.error(error)
-        response = { message: error.message, error }
-    }
-    res.status(500).json(response)
-})
 
 module.exports = app
